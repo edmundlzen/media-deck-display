@@ -1,7 +1,7 @@
 import time
 
 import gi
-import pyfirmata
+# import pyfirmata
 import firebase_admin
 from firebase_admin import db
 
