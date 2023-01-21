@@ -7,7 +7,7 @@ from gi.repository import Gtk
 class MyWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Say something")
-        self.set_size_request(300, 190)
+        self.fullscreen()
 
         self.box = Gtk.Box(orientation="vertical", spacing=2)
         self.add(self.box)
