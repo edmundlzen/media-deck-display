@@ -126,12 +126,12 @@ def on_volume_changed(event):
         win.set_volume(event.data)
 
 
-currentPlayingSongTitleRef = db.reference('currentPlayingSong/title')
-currentPlayingSongTitleRef.listen(on_current_playing_song_title_changed)
-currentPlayingSongProgressRef = db.reference('currentPlayingSong/progress')
-currentPlayingSongProgressRef.listen(on_current_playing_song_progress_changed)
-currentVolumeRef = db.reference('settings/volume')
-currentVolumeRef.listen(on_volume_changed)
+# currentPlayingSongTitleRef = db.reference('currentPlayingSong/title')
+# currentPlayingSongTitleRef.listen(on_current_playing_song_title_changed)
+# currentPlayingSongProgressRef = db.reference('currentPlayingSong/progress')
+# currentPlayingSongProgressRef.listen(on_current_playing_song_progress_changed)
+# currentVolumeRef = db.reference('settings/volume')
+# currentVolumeRef.listen(on_volume_changed)
 
 win.connect("destroy", Gtk.main_quit)
 win.show_all()
