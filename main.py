@@ -1,3 +1,4 @@
+import threading
 import time
 
 import gi
@@ -17,7 +18,7 @@ default_app = firebase_admin.initialize_app(cred_obj, {
 class MyWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Media Deck")
-        self.fullscreen()
+        # self.fullscreen()
         self.set_size_request(480, 320)
         self.set_resizable(False)
         self.outer_column = Gtk.Box(orientation="vertical", spacing=0)
@@ -74,6 +75,13 @@ class MyWindow(Gtk.Window):
         self.bottom_right_box_border.add(self.bottom_right_box)
         self.bottom_info_box.pack_start(self.bottom_right_box_border, True, True, 0)
 
+        currentPlayingSongTitleRef = db.reference('currentPlayingSong/title')
+        currentPlayingSongTitleRef.listen(self.on_current_playing_song_title_changed)
+        currentPlayingSongProgressRef = db.reference('currentPlayingSong/progress')
+        currentPlayingSongProgressRef.listen(self.on_current_playing_song_progress_changed)
+        currentVolumeRef = db.reference('settings/volume')
+        currentVolumeRef.listen(self.on_volume_changed)
+
     def progress_scale_clicked(self, widget, event):
         print("progress_scale_clicked", widget.get_value())
         currentPlayingSongProgressRef = db.reference('commands/progress')
@@ -104,35 +112,23 @@ class MyWindow(Gtk.Window):
         print("set_volume", volume)
         self.bottom_left_audio_scale.set_value(volume)
 
+    def on_current_playing_song_title_changed(self, event):
+        print("on_current_playing_song_title_changed", event.data)
+        if event.data is not None:
+            self.set_active_song_title(event.data)
+
+    def on_current_playing_song_progress_changed(self, event):
+        print("on_current_playing_song_progress_changed", event.data)
+        if event.data is not None:
+            self.set_active_song_progress(event.data)
+
+    def on_volume_changed(self, event):
+        print("on_volume_changed", event.data)
+        if event.data is not None:
+            self.set_volume(event.data)
+
 
 win = MyWindow()
-
-
-def on_current_playing_song_title_changed(event):
-    print("on_current_playing_song_title_changed", event.data)
-    if event.data is not None:
-        win.set_active_song_title(event.data)
-
-
-def on_current_playing_song_progress_changed(event):
-    print("on_current_playing_song_progress_changed", event.data)
-    if event.data is not None:
-        win.set_active_song_progress(event.data)
-
-
-def on_volume_changed(event):
-    print("on_volume_changed", event.data)
-    if event.data is not None:
-        win.set_volume(event.data)
-
-
-# currentPlayingSongTitleRef = db.reference('currentPlayingSong/title')
-# currentPlayingSongTitleRef.listen(on_current_playing_song_title_changed)
-# currentPlayingSongProgressRef = db.reference('currentPlayingSong/progress')
-# currentPlayingSongProgressRef.listen(on_current_playing_song_progress_changed)
-# currentVolumeRef = db.reference('settings/volume')
-# currentVolumeRef.listen(on_volume_changed)
-
 win.connect("destroy", Gtk.main_quit)
 win.show_all()
 Gtk.main()
