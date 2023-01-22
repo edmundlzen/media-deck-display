@@ -102,16 +102,15 @@ class MyWindow(Gtk.Window):
 
     def set_active_song_title(self, title):
         print("set_active_song_title", title)
-        # use idle_add to make sure the UI is updated from the main thread
         GLib.idle_add(self.active_info_title.set_text, title)
 
     def set_active_song_progress(self, progress):
         print("set_active_song_progress", progress)
-        self.active_info_scale.set_value(progress)
+        GLib.idle_add(self.active_info_scale.set_value, progress)
 
     def set_volume(self, volume):
         print("set_volume", volume)
-        self.bottom_left_audio_scale.set_value(volume)
+        GLib.idle_add(self.bottom_left_audio_scale.set_value, volume)
 
     def on_current_playing_song_title_changed(self, event):
         print("on_current_playing_song_title_changed", event.data)
