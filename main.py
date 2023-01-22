@@ -18,7 +18,7 @@ default_app = firebase_admin.initialize_app(cred_obj, {
 class MyWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Media Deck")
-        # self.fullscreen()
+        self.fullscreen()
         self.set_size_request(480, 320)
         self.set_resizable(False)
         self.outer_column = Gtk.Box(orientation="vertical", spacing=0)
