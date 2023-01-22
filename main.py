@@ -7,7 +7,7 @@ import firebase_admin
 from firebase_admin import db
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 cred_obj = firebase_admin.credentials.Certificate('media-deck-80f66-firebase-adminsdk-rdw0o-912eceec34.json')
 default_app = firebase_admin.initialize_app(cred_obj, {
@@ -102,7 +102,8 @@ class MyWindow(Gtk.Window):
 
     def set_active_song_title(self, title):
         print("set_active_song_title", title)
-        self.active_info_title.set_text(title)
+        # use idle_add to make sure the UI is updated from the main thread
+        GLib.idle_add(self.active_info_title.set_text, title)
 
     def set_active_song_progress(self, progress):
         print("set_active_song_progress", progress)
