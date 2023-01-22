@@ -86,17 +86,22 @@ class MyWindow(Gtk.Window):
 
     def btn_clicked(self, widget):
         if widget == self.bottom_left_button:
+            print("bottom_left_button clicked")
             self.currentValue.set_text(str(int(self.currentValue.get_text()) - 1))
         elif widget == self.bottom_right_button:
+            print("bottom_right_button clicked")
             self.currentValue.set_text(str(int(self.currentValue.get_text()) + 1))
 
     def set_active_song_title(self, title):
+        print("set_active_song_title", title)
         self.active_info_title.set_text(title)
 
     def set_active_song_progress(self, progress):
+        print("set_active_song_progress", progress)
         self.active_info_scale.set_value(progress)
 
     def set_volume(self, volume):
+        print("set_volume", volume)
         self.bottom_left_audio_scale.set_value(volume)
 
 
@@ -104,16 +109,19 @@ win = MyWindow()
 
 
 def on_current_playing_song_title_changed(event):
+    print("on_current_playing_song_title_changed", event.data)
     if event.data is not None:
         win.set_active_song_title(event.data)
 
 
 def on_current_playing_song_progress_changed(event):
+    print("on_current_playing_song_progress_changed", event.data)
     if event.data is not None:
         win.set_active_song_progress(event.data)
 
 
 def on_volume_changed(event):
+    print("on_volume_changed", event.data)
     if event.data is not None:
         win.set_volume(event.data)
 
