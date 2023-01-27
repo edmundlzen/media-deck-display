@@ -1,8 +1,8 @@
 import threading
 import time
+import pyfirmata
 
 import gi
-# import pyfirmata
 import firebase_admin
 from firebase_admin import db
 
@@ -17,7 +17,12 @@ default_app = firebase_admin.initialize_app(cred_obj, {
 
 class MyWindow(Gtk.Window):
     def __init__(self):
+
         Gtk.Window.__init__(self, title="Media Deck")
+        self.unmute_sent = None
+        self.mute_sent = None
+        self.last_analog_read = None
+        self.last_read_values = set()
         self.fullscreen()
         self.set_size_request(480, 320)
         self.set_resizable(False)
@@ -82,6 +87,90 @@ class MyWindow(Gtk.Window):
         currentVolumeRef = db.reference('settings/volume')
         currentVolumeRef.listen(self.on_volume_changed)
 
+        port = '/dev/ttyACM0'
+        self.board = pyfirmata.ArduinoMega(port)
+        board = self.board
+        it = pyfirmata.util.Iterator(board)
+        it.start()
+        for i in range(2, 11):
+            board.digital[i].mode = pyfirmata.INPUT
+        board.digital[22].mode = pyfirmata.INPUT
+        board.analog[0].enable_reporting()
+
+        # Run a loop to read the arduino
+        GLib.timeout_add(100, self.read_arduino)
+        self.show_all()
+
+    def read_arduino(self):
+        board = self.board
+        print("\033[2J")
+        for i in range(2, 11):
+            if board.analog[0].read() is not None:
+                if board.analog[0].read() != self.last_analog_read:
+                    print("New analog value: " + str(board.analog[0].read()))
+                    self.set_volume(board.analog[0].read() * 100)
+                    volumeRef = db.reference('settings/volume')
+                    volumeRef.set(board.analog[0].read() * 100)
+                self.last_analog_read = board.analog[0].read()
+            if board.digital[i].read() is True:
+                self.last_read_values.add(i)
+
+        for last_on_pin in self.last_read_values.copy():
+            if board.digital[last_on_pin].read() is False:
+                self.last_read_values.remove(last_on_pin)
+                pinNum = last_on_pin - 1
+                if pinNum == 1:
+                    # Do something with button 1
+                    print("Button 1 pressed")
+                    commandRef = db.reference('commands/previous')
+                    commandRef.set(True)
+                elif pinNum == 2:
+                    # Do something with button 2
+                    print("Button 2 pressed")
+                    commandRef = db.reference('commands/playPause')
+                    commandRef.set(True)
+                elif pinNum == 3:
+                    # Do something with button 3
+                    print("Button 3 pressed")
+                    commandRef = db.reference('commands/next')
+                    commandRef.set(True)
+                elif pinNum == 4:
+                    # Do something with button 4
+                    print("Button 4 pressed")
+                elif pinNum == 5:
+                    # Do something with button 5
+                    print("Button 5 pressed")
+                elif pinNum == 6:
+                    # Do something with button 6
+                    print("Button 6 pressed")
+                elif pinNum == 7:
+                    # Do something with button 7
+                    print("Button 7 pressed")
+                elif pinNum == 8:
+                    # Do something with button 8
+                    print("Button 8 pressed")
+                elif pinNum == 9:
+                    # Do something with button 9
+                    print("Button 9 pressed")
+
+        if board.digital[22].read() is True:
+            if self.mute_sent is False:
+                self.unmute_sent = False
+                # Do something
+                commandRef = db.reference('commands/mute')
+                commandRef.set(True)
+                print("Mute button pressed")
+                self.mute_sent = True
+        else:
+            self.mute_sent = False
+            if self.unmute_sent is False:
+                # Do something
+                commandRef = db.reference('commands/unmute')
+                commandRef.set(True)
+                print("Unmute button pressed")
+                self.unmute_sent = True
+        return True
+
     def progress_scale_clicked(self, widget, event):
         print("progress_scale_clicked", widget.get_value())
         currentPlayingSongProgressRef = db.reference('commands/progress')
@@ -132,11 +221,3 @@ win = MyWindow()
 win.connect("destroy", Gtk.main_quit)
 win.show_all()
 Gtk.main()
-
-# port = '/dev/ttyACM0'
-# board = pyfirmata.Arduino(port)
-# while True:
-#     board.digital[13].write(0)
-#     time.sleep(0.5)
-#     board.digital[13].write(1)
-#     time.sleep(0.2)
